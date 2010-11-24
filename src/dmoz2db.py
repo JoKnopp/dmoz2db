@@ -22,6 +22,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from xml.sax import parse
 
+import handler
+
 #the global logger
 LOG = logging.Logger('dmoz2db')
 
@@ -205,3 +207,8 @@ if __name__ == '__main__':
 	dbconfig = get_configuration(options.dbconfig)
 	engine = new_engine(dbconfig)
 	test_engine(engine)
+
+	shandler = handler.DmozStructureHandler(engine, options.topic_filter)
+
+	with open(options.structure_file, 'r') as xmlstream:
+		parse(xmlstream, shandler)
