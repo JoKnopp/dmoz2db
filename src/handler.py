@@ -13,7 +13,6 @@ __author__ = 'Johannes Knopp <johannes@informatik.uni-mannheim.de>'
 __copyright__ = '© Copyright 2010 Johannes Knopp'
 
 from schemes.xml_scheme import DmozStructure as DS
-from schemes.xml_scheme import DmozContent as CT
 from xml.sax import handler
 
 from structure import Topic
