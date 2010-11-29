@@ -26,7 +26,10 @@ from sqlalchemy.exc import OperationalError
 from schemes import table_scheme
 
 #the global logger
-LOG = logging.Logger('dmoz2db')
+LOG = logging.Logger(__name__, level=logging.DEBUG)
+#the database logger
+DBLOG = logging.getLogger('sqlalchemy')
+DBLOG.setLevel(logging.DEBUG)
 
 #exit status
 #Error while connecting to the database
@@ -116,12 +119,17 @@ def init_logging(options):
     error.setLevel(logging.ERROR)
     error.formatter = logging.Formatter('[%(levelname)s]: %(message)s')
     LOG.addHandler(error)
+    DBLOG.addHandler(error)
 
     if not options.quiet:
+        loglevel = logging.INFO
         console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
+        if options.debug:
+            loglevel = logging.DEBUG
+        console.setLevel(loglevel)
         console.formatter = logging.Formatter('[%(levelname)s]: %(message)s')
         LOG.addHandler(console)
+        DBLOG.addHandler(console)
 
     if options.log_file:
         log_file_handler = logging.FileHandler(
@@ -131,8 +139,10 @@ def init_logging(options):
         log_file_handler.formatter = logging.Formatter(
             '[%(levelname)s]: %(message)s')
         LOG.addHandler(log_file_handler)
+        DBLOG.addHandler(log_file_handler)
 
     LOG.debug('Logging initialised')
+    DBLOG.debug('DB logging initialised')
 
 def get_configuration(config_filename):
 	new_config = ConfigParser.SafeConfigParser()
