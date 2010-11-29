@@ -15,6 +15,7 @@ __copyright__ = '© Copyright 2010 Johannes Knopp'
 import re
 
 from xml.sax import handler
+from sqlalchemy.exc import IntegrityError
 
 import schemes.table_scheme as ts
 from schemes.xml_scheme import DmozStructure as DS
@@ -108,7 +109,10 @@ class DmozPreStructureHandler(DmozHandler):
 									'Title':self.topic_title
 										}
 									)
-			self.engine.execute(insertion)
+			try:
+				self.engine.execute(insertion)
+			except IntegrityError:
+				pass
 			self.ignore_topic = True
 
 		#cf. character function of DmozHandler

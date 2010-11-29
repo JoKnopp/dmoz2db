@@ -74,6 +74,14 @@ def init_optionparser():
 		help='Specify the most general category which should be filtered for [default: %default]'
 		)
 
+	parser.add_option('-k', '--keep-db',
+		default=False,
+		action='store_true',
+		dest='keep_db',
+		help='Do not delete existing tables [default: %default]'
+		)
+
+
 	#Logging related options
 	log_options = optparse.OptionGroup(parser,
 			'Logging',
@@ -200,12 +208,13 @@ def test_engine(engine):
 		LOG.error(e)
 		sys.exit(DBCONNECT)
 
-def setup_db(engine):
+def setup_db(engine, keep_db):
 	"""
 	Clears and initialises tables
 	"""
-	LOG.info('Dropping existing tables')
-	table_scheme.metadata.drop_all(engine)
+	if not keep_db:
+		LOG.info('Dropping existing tables')
+		table_scheme.metadata.drop_all(engine)
 	LOG.info('Initialising tables')
 	table_scheme.metadata.create_all(engine)
 
@@ -217,7 +226,7 @@ if __name__ == '__main__':
 	dbconfig = get_configuration(options.dbconfig)
 	engine = new_engine(dbconfig)
 	test_engine(engine)
-	setup_db(engine)
+	setup_db(engine, options.keep_db)
 
 	structure_prehandler = handler.DmozPreStructureHandler(engine, options.topic_filter)
 
