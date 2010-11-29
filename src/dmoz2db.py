@@ -17,12 +17,13 @@ import sys
 import optparse
 import logging
 import ConfigParser #for the database config file
+import handler
+from xml.sax import parse
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
-from xml.sax import parse
 
-import handler
+from schemes import table_scheme
 
 #the global logger
 LOG = logging.Logger('dmoz2db')
@@ -180,7 +181,7 @@ def new_engine(cf):
 		port = ':' + port
 	url = dialect + driver + '://' + user + ':' + pw + '@' + host + port + '/' + db_name
 	try:
-		engine = create_engine(url)
+		engine = create_engine(url, encoding='utf-8')
 	except ImportError, i:
 		LOG.error('Could not find database driver. Make sure it is installed or specify the driver you want to use in the config file!')
 		LOG.error(i)
@@ -188,7 +189,7 @@ def new_engine(cf):
 
 def test_engine(engine):
 	"""
-	Test if the connection is working
+	Tests if the connection is working
 	"""
 	try:
 		connection = engine.connect()
@@ -198,6 +199,15 @@ def test_engine(engine):
 		LOG.error('Could not connect to Database, check your configuration!')
 		LOG.error(e)
 		sys.exit(DBCONNECT)
+
+def setup_db(engine):
+	"""
+	Clears and initialises tables
+	"""
+	LOG.info('Dropping existing tables')
+	table_scheme.metadata.drop_all(engine)
+	LOG.info('Initialising tables')
+	table_scheme.metadata.create_all(engine)
 
 if __name__ == '__main__':
 	parser = init_optionparser()
