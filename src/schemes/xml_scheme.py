@@ -12,7 +12,6 @@ __version__ = '0.1'
 __author__ = 'Johannes Knopp <johannes@informatik.uni-mannheim.de>'
 __copyright__ = '© Copyright 2010 Johannes Knopp'
 
-
 class DmozStructure():
 	ALIAS = 'Alias'
 	TARGET = 'Target'
@@ -34,20 +33,10 @@ class DmozStructure():
 	SYMBOLIC1 = 'symbolic1'
 	SYMBOLIC2 = 'symbolic2'
 
-	#attributes corresponding to a name
-	_topic_attr = 'r:id'
-	_resource_attr = 'r:resource'
-	attr_of_name = {TOPIC:_topic_attr,
-					ALTLANG:_resource_attr,
-					ALTLANG1:_resource_attr,
-					#EDITOR:_resource_attr,
-					LETTERBAR:_resource_attr,
-					NARROW:_resource_attr,
-					NARROW1:_resource_attr,
-					NARROW2:_resource_attr,
-					NEWSGROUP:_resource_attr,
-					RELATED:_resource_attr,
-					SYMBOLIC:_resource_attr,
-					SYMBOLIC1:_resource_attr,
-					SYMBOLIC2:_resource_attr,
-					}
+	#attributes
+	topic_attr = 'r:id'
+	resource_attr = 'r:resource'
+
+	text_tags = set()
+	for tag in [CATID,TITLE,LASTUPDATE,DESCRIPTION]:
+		text_tags.add(tag)
