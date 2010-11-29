@@ -12,9 +12,12 @@ __version__ = '0.1'
 __author__ = 'Johannes Knopp <johannes@informatik.uni-mannheim.de>'
 __copyright__ = '© Copyright 2010 Johannes Knopp'
 
-from schemes.xml_scheme import DmozStructure as DS
+import re
+
 from xml.sax import handler
 
+import schemes.table_scheme as ts
+from schemes.xml_scheme import DmozStructure as DS
 from structure import Topic
 
 def _clean_html(data):
@@ -48,7 +51,6 @@ class DmozHandler(handler.ContentHandler):
 		else:
 			self.has_topicfilter = False
 		self.topic_filter = topic_filter
-		self.topic = ''
 		self.text = ''
 
 	def characters(self, content):
@@ -65,7 +67,52 @@ class DmozHandler(handler.ContentHandler):
 		pass
 
 	def endDocument(self):
+		#TODO logging message
 		pass
+
+class DmozPreStructureHandler(DmozHandler):
+	"""
+	handler to parse dmoz structure data into a db
+	"""
+
+	def __init__(self, db_engine, topic_filter):
+		DmozHandler.__init__(self, db_engine, topic_filter)
+		self.ignore_topic = False
+		self.topic_name = ''
+		self.topic_title = ''
+
+	def startElement(self, name, attrs):
+		if self.ignore_topic:
+			pass
+		if name==DS.TOPIC:
+			topic = attrs.get(DS.topic_attr)
+			if self.has_topicfilter:
+				if not topic.startswith(self.topic_filter):
+					self.ignore_topic = True
+					return
+			self.topic_name = topic
+			title = topic.split('/')[-1]
+			if not title:
+				title = ''
+			self.topic_title = title
+
+	def endElement(self, tagname):
+		if (tagname==DS.TOPIC):
+			self.ignore_topic = False
+			self.topic_name = ''
+		elif tagname == DS.CATID and self.topic_name != '':
+			catid = int(self.text)
+			insertion = ts.categories_t.insert(values={
+									'catid':catid,
+									'Topic':self.topic_name,
+									'Title':self.topic_title
+										}
+									)
+			self.engine.execute(insertion)
+			self.ignore_topic = True
+
+		#cf. character function of DmozHandler
+		self.text = ''
 
 class DmozStructureHandler(DmozHandler):
 	"""
@@ -74,7 +121,7 @@ class DmozStructureHandler(DmozHandler):
 	
 	def __init__(self, db_engine, topic_filter):
 		DmozHandler.__init__(self, db_engine, topic_filter)
-		self.tags = _get_allowed_tags(DS)
+		self.allowed_tags = _get_allowed_tags(DS)
 		self.ignore_topic = False
 		self.topic = None
 
@@ -82,14 +129,14 @@ class DmozStructureHandler(DmozHandler):
 		if self.ignore_topic:
 			pass
 		if name==DS.TOPIC:
-			topic = attrs.get(DS.attr_of_name[DS.TOPIC])
+			topic = attrs.get(DS.topic_attr)
 			if self.has_topicfilter:
 				if not topic.startswith(self.topic_filter):
 					self.ignore_topic = True
 					return
 			self.topic = Topic(topic)
 
-		if name not in self.tags:
+		elif name not in self.allowed_tags:
 			pass
 
 	def endElement(self, name):
@@ -97,4 +144,5 @@ class DmozStructureHandler(DmozHandler):
 			self.ignore_topic = False
 			self.topic = None
 
+		#cf. character function of DmozHandler
 		self.text = ''

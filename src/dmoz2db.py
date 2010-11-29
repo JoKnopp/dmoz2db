@@ -217,8 +217,9 @@ if __name__ == '__main__':
 	dbconfig = get_configuration(options.dbconfig)
 	engine = new_engine(dbconfig)
 	test_engine(engine)
+	setup_db(engine)
 
-	shandler = handler.DmozStructureHandler(engine, options.topic_filter)
+	structure_prehandler = handler.DmozPreStructureHandler(engine, options.topic_filter)
 
 	with open(options.structure_file, 'r') as xmlstream:
-		parse(xmlstream, shandler)
+		parse(xmlstream, structure_prehandler)
