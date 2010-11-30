@@ -20,8 +20,9 @@ import ConfigParser #for the database config file
 import handler
 from xml.sax import parse
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Index
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.sql.expression import bindparam
 
 from schemes import table_scheme
 
@@ -234,17 +235,63 @@ def setup_db(engine, keep_db):
     LOG.info('Initialising tables')
     table_scheme.metadata.create_all(engine)
 
+def create_index(engine):
+    LOG.info('creating index for topics')
+    i = Index('topics', table_scheme.categories_t.c.Topic)
+    i.create(engine)
+    LOG.info('done')
+
+
+def add_father_ids(engine):
+    ct = table_scheme.categories_t
+    connection = engine.connect()
+
+    #prepared statements
+    selection = ct.select().where(ct.c.Topic==bindparam('f_topic'))
+    fid_update = ct.update().where(ct.c.catid==bindparam('child_id')).values(fatherid=bindparam('fatherid_'))
+    all_categories = connection.execute('SELECT * FROM categories')
+
+    LOG.info('Generating father ids...This may take some time, so have a cup
+    of tea!')
+    counter = 0
+    for row in all_categories:
+        counter += 1
+        topic = row.Topic
+        title = row.Title
+        catid = row.catid
+        if catid < 3: #ignore "" and "Top"
+            continue
+
+        index = len(topic)-(len(title)+1)
+        father_topic = topic[:index]
+
+        father_selection = connection.execute(selection, f_topic=father_topic)
+        father = father_selection.first()
+        if father == None:
+            LOG.warning('Found no father for "{0}", searched for "{1}"'.format(topic, father_topic))
+            continue
+        father_id = father[ct.c.catid]
+        connection.execute(fid_update, child_id=catid, fatherid_=father_id)
+        if counter % 10000 == 0:
+            LOG.info(counter)
+    LOG.info('Father ids generated')
+    
+
 if __name__ == '__main__':
     parser = init_optionparser()
     (options, args) = parser.parse_args()
     init_logging(options)
 
-	setup_db(engine, options.keep_db)
     dbconfig = get_configuration(options.dbconfig)
     engine = new_engine(dbconfig)
     test_engine(engine)
+    setup_db(engine, options.keep_db)
 
     structure_prehandler = handler.DmozPreStructureHandler(engine, options.topic_filter)
+    with open(options.structure_file, 'r') as xmlstream:
+        parse(xmlstream, structure_prehandler)
 
-	with open(options.structure_file, 'r') as xmlstream:
-		parse(xmlstream, structure_prehandler)
+    create_index(engine)
+    add_father_ids(engine)
+
+
