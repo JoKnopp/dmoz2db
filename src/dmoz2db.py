@@ -256,8 +256,7 @@ def add_father_ids(engine):
     fid_update = ct.update().where(ct.c.catid==bindparam('child_id')).values(fatherid=bindparam('fatherid_'))
     all_categories = connection.execute('SELECT * FROM categories')
 
-    LOG.info('Generating father ids...This may take some time, so have a cup
-    of tea!')
+    LOG.info('Generating father ids...This may take some time, so have a cup of tea!')
     counter = 0
     for row in all_categories:
         counter += 1

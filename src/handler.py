@@ -12,6 +12,7 @@ __author__ = 'Johannes Knopp <johannes@informatik.uni-mannheim.de>'
 __copyright__ = '© Copyright 2010 Johannes Knopp'
 
 import re
+import logging
 
 from xml.sax import handler
 from sqlalchemy.exc import IntegrityError
@@ -19,6 +20,8 @@ from sqlalchemy.exc import IntegrityError
 import schemes.table_scheme as ts
 from schemes.xml_scheme import DmozStructure as DS
 from structure import Topic
+
+_log = logging.getLogger(__name__)
 
 def _clean_html(data):
 	"""Removes html from a string"""
@@ -67,12 +70,13 @@ class DmozHandler(handler.ContentHandler):
 		pass
 
 	def endDocument(self):
-		#TODO logging message
 		pass
 
 class DmozPreStructureHandler(DmozHandler):
 	"""
-	handler to parse dmoz structure data into a db
+	Insert basic Topic information into a database
+
+	Basic information consists of the topic name, title and catid
 	"""
 
 	def __init__(self, db_engine, topic_filter):
@@ -110,7 +114,8 @@ class DmozPreStructureHandler(DmozHandler):
 									)
 			try:
 				self.engine.execute(insertion)
-			except IntegrityError:
+			except IntegrityError, e:
+				_log.error(e)
 				pass
 			self.ignore_topic = True
 
@@ -119,7 +124,7 @@ class DmozPreStructureHandler(DmozHandler):
 
 class DmozStructureHandler(DmozHandler):
 	"""
-	handler to parse dmoz structure data into a db
+	Insert additional topic information to a database
 	"""
 	
 	def __init__(self, db_engine, topic_filter):
@@ -140,10 +145,11 @@ class DmozStructureHandler(DmozHandler):
 			self.topic = Topic(topic)
 
 		elif name not in self.allowed_tags:
+			_log.debug('Found unallowed tag {0}'.format(name))
 			pass
 
-	def endElement(self, name):
-		if name==DS.TOPIC:
+	def endElement(self, tagname):
+		if tagname==DS.TOPIC:
 			self.ignore_topic = False
 			self.topic = None
 
