@@ -130,13 +130,18 @@ def init_logging(options):
 
     if not options.quiet:
         loglevel = logging.INFO
+        dbloglevel = logging.WARNING
+        db_console = logging.StreamHandler()
         console = logging.StreamHandler()
         if options.debug:
             loglevel = logging.DEBUG
+            dbloglevel = logging.INFO
         console.setLevel(loglevel)
         console.formatter = logging.Formatter('[%(levelname)s]: %(message)s')
+        db_console.setLevel(dbloglevel)
+        db_console.formatter = logging.Formatter('[%(levelname)s]: %(message)s')
         LOG.addHandler(console)
-        DBLOG.addHandler(console)
+        DBLOG.addHandler(db_console)
 
     if options.log_file:
         log_file_handler = logging.FileHandler(
