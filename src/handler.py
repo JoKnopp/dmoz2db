@@ -145,13 +145,22 @@ class DmozStructureHandler(DmozHandler):
 			self.topic = Topic(topic)
 
 		elif name not in self.allowed_tags:
-			_log.debug('Found unallowed tag {0}'.format(name))
+			_log.debug('Found forbidden tag {0}'.format(name))
 			pass
+
+		#save attrs in self.topic
+		elif (self.topic) and (name not in DS.text_tags):
+			self.topic.save_attr_by_tag(name, attrs)
 
 	def endElement(self, tagname):
 		if tagname==DS.TOPIC:
 			self.ignore_topic = False
-			self.topic = None
+			if self.topic != None:
+				self.topic.store_in_db(self.engine)
+				self.topic = None
+		elif (tagname in DS.text_tags) and (self.topic != None):
+			text = _clean_html(self.text)
+			self.topic.add_text(tagname, text)
 
 		#cf. character function of DmozHandler
 		self.text = ''
