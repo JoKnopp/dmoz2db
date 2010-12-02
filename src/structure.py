@@ -30,6 +30,7 @@ class Topic(object):
 		self.text_vars = {}
 		for tvar in DS.text_tags:
 			self.text_vars[tvar] = ''
+		self.alias = [] #Topic-names
 		self.letterbar = [] #Topic-names
 		self.related = [] #Topic-names
 		self.newsgroups = []
@@ -114,6 +115,24 @@ class Topic(object):
 
 	def add_text(self, tag, text):
 		self.text_vars[tag] = text
+
+	def add_alias(self, alias):
+		self.alias.append(alias)
+
+	def _store_alias(self, engine, conn):
+		for alias_name in self.alias:
+			alias_dbdata = conn.execute(sel_by_top, tname=alias_name)
+			aliascat = alias_dbdata.first()
+			if None == aliascat:
+				_log.debug('aliascat of {0} not found: {1}'.format(self.name, alias_name))
+				continue
+
+			alias_id = aliascat[ct.c.catid]
+			try:
+				conn.execute(ins_alias, cid=self.catid, alias_cid=alias_id)
+			except IntegrityError:
+				_log.debug('IntegrityError: Entry <catid({0}) aliascatid({1})> already exists in table "aliases"'.format(self.catid, alias_id))
+
 
 	def _store_letterbar(self, engine, conn):
 		"""
@@ -205,6 +224,7 @@ class Topic(object):
 		"""
 		conn= engine.connect()
 
+		self._store_alias(engine, conn)
 		self._store_letterbar(engine, conn)
 		self._store_related(engine, conn)
 		self._store_newsgroups(engine, conn)

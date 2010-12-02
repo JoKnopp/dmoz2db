@@ -13,6 +13,11 @@ __copyright__ = '© Copyright 2010 Johannes Knopp'
 metadata = MetaData()
 TOPCAT = 1 #catid for "" - Used as default ref if real catid is unknown
 
+aliases_t = Table('aliases', metadata,
+	Column('catid', Integer, ForeignKey('categories.catid'), primary_key=True),
+	Column('alias_catid', Integer, ForeignKey('categories.catid'), primary_key=True)
+)
+
 altlangs_t = Table('altlangs', metadata,
 	Column('catid', Integer, ForeignKey('categories.catid'), primary_key=True),
 	Column('language', Unicode(255), primary_key=True),

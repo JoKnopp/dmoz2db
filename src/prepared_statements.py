@@ -16,12 +16,12 @@ from sqlalchemy.sql.expression import bindparam
 
 import schemes.table_scheme as ts
 
+at = ts.aliases_t
 ct = ts.categories_t
 rt = ts.related_t
 ngt = ts.newsgroups_t
 alt = ts.altlangs_t
 st = ts.symbolics_t
-
 
 #selects
 sel_by_id = ct.select().where(
@@ -42,6 +42,11 @@ upd_lup_desc = ct.update().where(
     )
 
 #inserts
+ins_alias = at.insert().values(
+        catid=bindparam('cid', required=True)
+    ).values(
+        alias_catid=bindparam('alias_cid', required=True)
+    )
 ins_related = rt.insert().values(
         catid=bindparam('cid',required=True)
     ).values(

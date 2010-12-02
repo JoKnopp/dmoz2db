@@ -142,13 +142,23 @@ class DmozStructureHandler(DmozHandler):
 		if self.ignore_topic:
 			pass
 		if name==DS.TOPIC:
+			if self.topic != None:
+				#Store self.topic at startElement because aliases are added to
+				#it between </topic> and <topic>
+				self.topic.store_in_db(self.engine)
 			self.topic_count += 1
 			topic = attrs.get(DS.topic_attr)
 			if self.has_topicfilter:
 				if not topic.startswith(self.topic_filter):
 					self.ignore_topic = True
+					self.topic = None
 					return
 			self.topic = Topic(topic)
+
+		elif name==DS.ALIAS and self.topic != None:
+			title_alias = attrs.get(DS.topic_attr)
+			alias = title_alias.split(':')[-1]
+			self.topic.add_alias(alias)
 
 		elif name not in self.allowed_tags:
 			_log.debug('Found forbidden tag {0}'.format(name))
@@ -163,9 +173,6 @@ class DmozStructureHandler(DmozHandler):
 			if self.topic_count % 10000 == 0:
 				_log.info('Parsed {0} Topics'.format(self.topic_count))
 			self.ignore_topic = False
-			if self.topic != None:
-				self.topic.store_in_db(self.engine)
-				self.topic = None
 		elif (tagname in DS.text_tags) and (self.topic != None):
 			text = _clean_html(self.text)
 			self.topic.add_text(tagname, text)
