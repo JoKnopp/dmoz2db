@@ -68,14 +68,14 @@ def init_optionparser():
     parser.add_option('-s', '--structure-file',
         type='string',
         dest='structure_file',
-        default=os.path.expanduser('~/data/dmoz/structure.rdf.u8'),
+        default=os.path.expanduser('structure.rdf.u8'),
         help='Specify the dmoz structure file [default: %default]'
     )
 
     parser.add_option('-c', '--content-file',
         type='string',
         dest='content_file',
-        default=os.path.expanduser('~/data/dmoz/content.rdf.u8'),
+        default=os.path.expanduser('content.rdf.u8'),
         help='Specify the dmoz content file [default: %default]'
     )
 
