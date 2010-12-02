@@ -14,33 +14,33 @@ metadata = MetaData()
 TOPCAT = 1 #catid for "" - Used as default ref if real catid is unknown
 
 altlangs_t = Table('altlangs', metadata,
-	Column('catid', Integer, ForeignKey('categories.catid')),
-	Column('language', Unicode(255)),
-	Column('resource', Unicode(255)),
+	Column('catid', Integer, ForeignKey('categories.catid'), primary_key=True),
+	Column('language', Unicode(255), primary_key=True),
+	Column('resource', Unicode(512), index=True),
 )
 
 categories_t = Table('categories', metadata,
 	Column('catid', Integer, primary_key=True, nullable=False),
-	Column('Topic', Unicode(512)),
-	Column('Title', Unicode(255)),
+	Column('Topic', Unicode(512), index=True),
+	Column('Title', Unicode(255), index=True),
 	Column('Description', Text(65535)),
-	Column('lastUpdate', Unicode(255)),
+	Column('lastupdate', Unicode(255)),
 	Column('letterbar', Boolean, default=False),
 	Column('fatherid', Integer, ForeignKey('categories.catid'), default=TOPCAT)
 )
 
 newsgroups_t = Table('newsgroups', metadata,
-	Column('catid', Integer, ForeignKey('categories.catid')),
-	Column('newsGroup', Unicode(255)),
+	Column('catid', Integer, ForeignKey('categories.catid'), primary_key=True),
+	Column('newsgroup', Unicode(255), primary_key=True),
 )
 
 related_t = Table('related', metadata,
-	Column('catid', Integer, ForeignKey('categories.catid')),
-	Column('rcatid', Integer, ForeignKey('categories.catid'))
+	Column('catid', Integer, ForeignKey('categories.catid'), primary_key=True),
+	Column('rcatid', Integer, ForeignKey('categories.catid'), primary_key=True)
 )
 
 symbolics_t = Table('symbolics', metadata,
-	Column('catid', Integer, ForeignKey('categories.catid')),
+	Column('catid', Integer, ForeignKey('categories.catid'), primary_key=True),
 	Column('symbol', Unicode(255)),
-	Column('scatid', Integer, ForeignKey('categories.catid'))
+	Column('scatid', Integer, ForeignKey('categories.catid'), primary_key=True)
 )
