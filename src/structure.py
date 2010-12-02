@@ -13,6 +13,7 @@ __author__ = 'Johannes Knopp <johannes@informatik.uni-mannheim.de>'
 __copyright__ = '© Copyright 2010 Johannes Knopp'
 
 import sys
+import logging
 
 from sqlalchemy.sql.expression import bindparam
 from sqlalchemy.exceptions import IntegrityError
@@ -20,6 +21,7 @@ from sqlalchemy.exceptions import IntegrityError
 from schemes.xml_scheme import DmozStructure as DS
 from prepared_statements import *
 
+_log = logging.getLogger(__name__)
 
 class Topic(object):
 
@@ -132,14 +134,14 @@ class Topic(object):
 			rtop_dbdata = conn.execute(sel_by_top, tname=rel_top)
 			relcat = rtop_dbdata.first()
 			if None == relcat:
-				print('relcat of {0} not found: {1}'.format(self.name, rel_top))
+				_log.debug('relcat of {0} not found: {1}'.format(self.name, rel_top))
 				continue
 
 			relcat_id = relcat[ct.c.catid]
 			try:
 				conn.execute(ins_related, cid=self.catid, rel_cid=relcat_id)
 			except IntegrityError:
-				print('IntegrityError: Entry <catid({0}) relcatid({1})> already exists in table "related"'.format(self.catid, relcat_id))
+				_log.debug('IntegrityError: Entry <catid({0}) relcatid({1})> already exists in table "related"'.format(self.catid, relcat_id))
 
 	def _store_newsgroups(self, engine, conn):
 		"""
@@ -151,7 +153,7 @@ class Topic(object):
 			try:
 				conn.execute(ins_newsgroup, cid=self.catid, ngrp=ng)
 			except IntegrityError:
-				print('IntegrityError: Entry <catid({0}) newsgroup({1})> already exists in table "newsgroups"'.format(self.catid, ng))
+				_log.debug('IntegrityError: Entry <catid({0}) newsgroup({1})> already exists in table "newsgroups"'.format(self.catid, ng))
 
 	def _store_altlang(self, engine, conn):
 		"""
@@ -163,7 +165,7 @@ class Topic(object):
 			try:
 				conn.execute(ins_altlang, cid=self.catid, lang=language, res=topic_name)
 			except IntegrityError:
-				print('IntegrityError: catid({0}) already has an entry for language "{1}"'.format(self.catid, language))
+				_log.debug('IntegrityError: catid({0}) already has an entry for language "{1}"'.format(self.catid, language))
 
 
 	def _store_symbolics(self, engine, conn):
@@ -176,14 +178,14 @@ class Topic(object):
 			top_dbdata = conn.execute(sel_by_top, tname=topic_name)
 			symbol_cat = top_dbdata.first()
 			if None == symbol_cat:
-				print('symbolic cat of {0} not found: {1}'.format(self.name, topic_name))
+				_log.debug('symbolic cat of {0} not found: {1}'.format(self.name, topic_name))
 				continue
 
 			symbol_cat_id = symbol_cat[ct.c.catid]
 			try:
 				conn.execute(ins_symbolic, cid=self.catid, symb=symbol, scid=symbol_cat_id)
 			except IntegrityError:
-				print('IntegrityError: catid({0}) already has symbol with reference to refcatid({1})'.format(self.catid, symbol_cat_id))
+				_log.debug('IntegrityError: catid({0}) already has symbol with reference to refcatid({1})'.format(self.catid, symbol_cat_id))
 
 
 	def _store_lastupdate_and_description(self, engine, conn):

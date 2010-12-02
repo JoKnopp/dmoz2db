@@ -27,10 +27,18 @@ from sqlalchemy.sql.expression import bindparam
 from schemes import table_scheme
 
 #the global logger
-LOG = logging.Logger(__name__, level=logging.DEBUG)
+LOG = logging.Logger(__name__)
+LOG.setLevel(logging.DEBUG)
 #the database logger
 DBLOG = logging.getLogger('sqlalchemy')
 DBLOG.setLevel(logging.DEBUG)
+#the parser logger
+PARSELOG = logging.getLogger('handler')
+PARSELOG.setLevel(logging.DEBUG)
+#structure
+SLOG = logging.getLogger('structure')
+SLOG.setLevel(logging.DEBUG)
+
 
 #exit status
 #Error while connecting to the database
@@ -127,6 +135,8 @@ def init_logging(options):
     error.formatter = logging.Formatter('[%(levelname)s]: %(message)s')
     LOG.addHandler(error)
     DBLOG.addHandler(error)
+    SLOG.addHandler(error)
+    PARSELOG.addHandler(error)
 
     if not options.quiet:
         loglevel = logging.INFO
@@ -141,6 +151,8 @@ def init_logging(options):
         db_console.setLevel(dbloglevel)
         db_console.formatter = logging.Formatter('[%(levelname)s]: %(message)s')
         LOG.addHandler(console)
+        PARSELOG.addHandler(console)
+        SLOG.addHandler(console)
         DBLOG.addHandler(db_console)
 
     if options.log_file:
@@ -151,10 +163,11 @@ def init_logging(options):
         log_file_handler.formatter = logging.Formatter(
             '[%(levelname)s]: %(message)s')
         LOG.addHandler(log_file_handler)
+        PARSELOG.addHandler(log_file_handler)
+        SLOG.addHandler(log_file_handler)
         DBLOG.addHandler(log_file_handler)
 
     LOG.debug('Logging initialised')
-    DBLOG.debug('DB logging initialised')
 
 def get_configuration(config_filename):
     new_config = ConfigParser.SafeConfigParser()
@@ -240,7 +253,7 @@ def setup_db(engine, keep_db):
     LOG.info('Initialising tables')
     table_scheme.metadata.create_all(engine)
 
-def create_index(engine):
+def create_topic_index(engine):
     LOG.info('creating index for topics')
     i = Index('topics', table_scheme.categories_t.c.Topic)
     i.create(engine)
@@ -256,7 +269,6 @@ def add_father_ids(engine):
     fid_update = ct.update().where(ct.c.catid==bindparam('child_id')).values(fatherid=bindparam('fatherid_'))
     all_categories = connection.execute('SELECT * FROM categories')
 
-    LOG.info('Generating father ids...This may take some time, so have a cup of tea!')
     counter = 0
     for row in all_categories:
         counter += 1
@@ -272,13 +284,12 @@ def add_father_ids(engine):
         father_selection = connection.execute(selection, f_topic=father_topic)
         father = father_selection.first()
         if father == None:
-            LOG.warning('Found no father for "{0}", searched for "{1}"'.format(topic, father_topic))
+            LOG.debug('Found no father for "{0}", searched for "{1}"'.format(topic, father_topic))
             continue
         father_id = father[ct.c.catid]
         connection.execute(fid_update, child_id=catid, fatherid_=father_id)
         if counter % 10000 == 0:
-            LOG.info(counter)
-    LOG.info('Father ids generated')
+            LOG.info('{0} father ids generated..'.format(counter))
     
 
 if __name__ == '__main__':
@@ -293,9 +304,18 @@ if __name__ == '__main__':
 
     structure_prehandler = handler.DmozPreStructureHandler(engine, options.topic_filter)
     with open(options.structure_file, 'r') as xmlstream:
+        LOG.info('Starting first parse of {0}'.format(options.structure_file))
         parse(xmlstream, structure_prehandler)
+        LOG.info('done - added all Topics to the database')
 
-    create_index(engine)
+    create_topic_index(engine)
+    LOG.info('Generating father ids')
     add_father_ids(engine)
+    LOG.info('Father id generation successful')
 
+    structure_handler = handler.DmozStructureHandler(engine, options.topic_filter)
 
+    with open(options.structure_file, 'r') as xmlstream:
+        LOG.info('Starting second parse of {0}'.format(options.structure_file))
+        parse(xmlstream, structure_handler)
+        LOG.info('done - inserted additional topic-information to the database')

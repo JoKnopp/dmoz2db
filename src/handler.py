@@ -81,6 +81,7 @@ class DmozPreStructureHandler(DmozHandler):
 
 	def __init__(self, db_engine, topic_filter):
 		DmozHandler.__init__(self, db_engine, topic_filter)
+		self.topic_count = 0
 		self.ignore_topic = False
 		self.topic_name = ''
 		self.topic_title = ''
@@ -89,6 +90,7 @@ class DmozPreStructureHandler(DmozHandler):
 		if self.ignore_topic:
 			pass
 		if name==DS.TOPIC:
+			self.topic_count += 1
 			topic = attrs.get(DS.topic_attr)
 			if self.has_topicfilter:
 				if not topic.startswith(self.topic_filter):
@@ -102,6 +104,8 @@ class DmozPreStructureHandler(DmozHandler):
 
 	def endElement(self, tagname):
 		if (tagname==DS.TOPIC):
+			if self.topic_count % 10000 == 0:
+				_log.info('Parsed {0} Topics'.format(self.topic_count))
 			self.ignore_topic = False
 			self.topic_name = ''
 		elif tagname == DS.CATID and self.topic_name != '':
@@ -115,7 +119,7 @@ class DmozPreStructureHandler(DmozHandler):
 			try:
 				self.engine.execute(insertion)
 			except IntegrityError, e:
-				_log.error(e)
+				_log.debug(e)
 				pass
 			self.ignore_topic = True
 
@@ -129,6 +133,7 @@ class DmozStructureHandler(DmozHandler):
 	
 	def __init__(self, db_engine, topic_filter):
 		DmozHandler.__init__(self, db_engine, topic_filter)
+		self.topic_count = 0
 		self.allowed_tags = _get_allowed_tags(DS)
 		self.ignore_topic = False
 		self.topic = None
@@ -137,6 +142,7 @@ class DmozStructureHandler(DmozHandler):
 		if self.ignore_topic:
 			pass
 		if name==DS.TOPIC:
+			self.topic_count += 1
 			topic = attrs.get(DS.topic_attr)
 			if self.has_topicfilter:
 				if not topic.startswith(self.topic_filter):
@@ -154,6 +160,8 @@ class DmozStructureHandler(DmozHandler):
 
 	def endElement(self, tagname):
 		if tagname==DS.TOPIC:
+			if self.topic_count % 10000 == 0:
+				_log.info('Parsed {0} Topics'.format(self.topic_count))
 			self.ignore_topic = False
 			if self.topic != None:
 				self.topic.store_in_db(self.engine)
