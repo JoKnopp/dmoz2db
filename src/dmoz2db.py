@@ -37,7 +37,7 @@ import time
 from datetime import timedelta
 from xml.sax import parse
 
-from sqlalchemy import create_engine, Index
+from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import bindparam
 
@@ -270,13 +270,6 @@ def setup_db(engine, keep_db):
     LOG.info('Initialising tables')
     table_scheme.metadata.create_all(engine)
 
-def create_topic_index(engine):
-    LOG.info('creating index for topics')
-    i = Index('topics', table_scheme.categories_t.c.Topic)
-    i.create(engine)
-    LOG.info('done')
-
-
 def add_father_ids(engine):
     ct = table_scheme.categories_t
     connection = engine.connect()
@@ -332,7 +325,6 @@ if __name__ == '__main__':
         firstparse_duration = timedelta(seconds=(time.time()-firstparse_starttime))
         LOG.info('done - added all Topics to the database (took {0})'.format(firstparse_duration))
 
-    create_topic_index(engine)
     LOG.info('Generating father ids')
     idgen_starttime = time.time()
     add_father_ids(engine)
