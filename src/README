@@ -1,0 +1,56 @@
+dmoz2db is a tool to parse the RDF-like dumps from http://rdf.dmoz.org/rdf/ and
+put the contents into a database. dmoz2db is tested with MySQL but should work
+with other databases as well. IT COMES WITH ABSOLUTELY NO WARRANTY OF ANY KIND. 
+
+Instructions
+
+To use dmoz2db you need to install sqlalchemy 0.6.5 or higher
+(http://www.sqlalchemy.org)
+
+Your database must have utf8 support enabled. For MySQL a description how to do
+that is available here: 
+http://cameronyule.com/2008/07/configuring-mysql-to-use-utf-8
+
+The database where the dmoz data will be stored must be created manually:
+
+mysql> create database DATABASENAME;
+mysql> GRANT ALL ON smalldmoz.* TO 'USERNAME'@'localhost';
+
+After that you should edit db.sample.conf according to your setup and save it
+as db.conf.
+
+Running:
+
+If the rdf files are present in your current directory you can just say
+~$ python dmoz.py
+
+but you may want to run 
+~$ python dmoz.py --help
+
+first and look at the available options. Most of them should be self
+explaining. If you are not interested in the complete dmoz dataset you can
+specify a topic filter to ignore everything which is not under the given
+category which speeds up the process. Take care with trailing slashes:
+'Top/Computers' includes the category while 'Top/Computers/' filters for
+everything under that category. The default father id is 1 for every category whose
+father was filtered.
+
+Debug output should be turned on only in combination with the logging option
+because every sql statement is printed.
+
+The import will take time, so go to lunch or find something else to do :) And
+don't halloo till you're out of the wood: There is a first parse inserting the
+basic topic structure into the db, then the father ids are generated and after
+that all the additional information like related categories or other languages
+are added in the second parse. Last but not least the content.rdf file is
+parsed to add the externalpage information to the database.
+
+On my laptop it took about 20 minutes to complete the first parse, 25 minutes
+for generating father ids, <TIME> minutes for the second parse and <TIME>
+minutes for the content.rdf file which results in <TIME> total. One dot in the
+output means 10,000 processed topics, newline is generated after 200,000
+Topics.
+
+In the structure.rdf file entries dealing with the last editor are ignored. For
+content.rdf the tags <mediadate>, <type>, <uksite>, <age> and <priority> are
+ignored because they are present only in a fraction of the data.
