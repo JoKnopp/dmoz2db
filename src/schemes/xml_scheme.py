@@ -29,6 +29,7 @@ class DmozStructure():
 	NARROW2 = 'narrow2'
 	NEWSGROUP = 'newsgroup'
 	RELATED = 'related'
+	RDF = 'RDF'
 	SYMBOLIC = 'symbolic'
 	SYMBOLIC1 = 'symbolic1'
 	SYMBOLIC2 = 'symbolic2'
@@ -39,4 +40,32 @@ class DmozStructure():
 
 	text_tags = set()
 	for tag in [CATID,TITLE,LASTUPDATE,DESCRIPTION]:
+		text_tags.add(tag)
+
+class DmozContent():
+	EXTERNALPAGE = 'ExternalPage'
+	TOPIC = 'Topic'
+	AGES = 'ages'
+	ATOM = 'atom'
+	CATID = 'catid'
+	DESCRIPTION = 'd:Description'
+	TITLE = 'd:Title'
+	LINK = 'link'
+	LINK1 = 'link1'
+	MEDIADATE = 'mediadate'
+	PDF = 'pdf'
+	PDF1 = 'pdf1'
+	PRIORITY = 'priority'
+	RDF = 'RDF'
+	RSS = 'rss'
+	RSS1 = 'rss1'
+	TOPIC2 = 'topic'
+	TYPE = 'type'
+	UKSITE = 'uksite'
+
+	topic_attr = 'r:id'
+	ext_attr = 'about'
+
+	text_tags = set()
+	for tag in [CATID,TITLE,DESCRIPTION]:
 		text_tags.add(tag)

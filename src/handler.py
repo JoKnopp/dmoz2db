@@ -19,7 +19,9 @@ from sqlalchemy.exc import IntegrityError
 
 import schemes.table_scheme as ts
 from schemes.xml_scheme import DmozStructure as DS
+from schemes.xml_scheme import DmozContent as DC
 from structure import Topic
+from content import Link
 
 _log = logging.getLogger(__name__)
 
@@ -123,6 +125,10 @@ class DmozPreStructureHandler(DmozHandler):
 				pass
 			self.ignore_topic = True
 
+		elif tagname == DS.RDF:
+			print
+			_log.info('Parsed {0} Topics'.format(self.topic_count))
+
 		#cf. character function of DmozHandler
 		self.text = ''
 
@@ -173,9 +179,74 @@ class DmozStructureHandler(DmozHandler):
 			if self.topic_count % 10000 == 0:
 				_log.info('Parsed {0} Topics'.format(self.topic_count))
 			self.ignore_topic = False
+
+		elif tagname == DS.RDF:
+			print
+			_log.info('Parsed {0} Topics'.format(self.topic_count))
+
+		elif self.ignore_topic:
+			return
+
 		elif (tagname in DS.text_tags) and (self.topic != None):
 			text = _clean_html(self.text)
 			self.topic.add_text(tagname, text)
+
+		#cf. character function of DmozHandler
+		self.text = ''
+
+
+class DmozContentHandler(DmozHandler):
+	"""
+	Insert links related to a topic to a database
+	"""
+	def __init__(self, db_engine, topic_filter):
+		DmozHandler.__init__(self, db_engine, topic_filter)
+		self.topic_count = 0
+		self.allowed_tags = _get_allowed_tags(DC)
+		self.ignore_topic = False
+		self.link = None
+	
+	def startElement(self, name, attrs):
+		if name==DC.TOPIC:
+			self.topic_count += 1
+			topic = attrs.get(DS.topic_attr)
+			if self.has_topicfilter:
+				if not topic.startswith(self.topic_filter):
+					self.ignore_topic = True
+					return
+				else:
+					self.ignore_topic = False
+					return
+
+		if self.ignore_topic:
+			pass
+
+		elif name==DC.EXTERNALPAGE:
+			self.link = Link(attrs.get(DC.ext_attr), self.catid)
+
+		elif name not in self.allowed_tags:
+			_log.debug('Found forbidden tag "{0}"'.format(name))
+			pass
+
+	def endElement(self, tagname):
+		if tagname == DS.RDF:
+			print
+			_log.info('Parsed {0} Topics'.format(self.topic_count))
+
+		elif self.ignore_topic:
+			return
+
+		#save text fields
+		elif tagname == DC.CATID:
+			self.catid = self.text
+		elif tagname == DC.TITLE:
+			self.link.title = self.text
+		elif tagname == DC.DESCRIPTION:
+			self.link.description = self.text
+
+		elif tagname == DC.EXTERNALPAGE:
+			self.link.store_in_db(self.engine)
+			self.link = None
 
 		#cf. character function of DmozHandler
 		self.text = ''

@@ -22,6 +22,7 @@ rt = ts.related_t
 ngt = ts.newsgroups_t
 alt = ts.altlangs_t
 st = ts.symbolics_t
+xpt = ts.externalpages_t
 
 #selects
 sel_by_id = ct.select().where(
@@ -70,4 +71,13 @@ ins_symbolic = st.insert().values(
         scatid=bindparam('scid',required=True)
     ).values(
         symbol=bindparam('symb',required=True)
+    )
+ins_externalpage = xpt.insert().values(
+        catid=bindparam('cid',required=True)
+    ).values(
+        link=bindparam('lnk',required=True)
+    ).values(
+        Title=bindparam('lnktitle',required=True)
+    ).values(
+        Description=bindparam('descr',required=True)
     )

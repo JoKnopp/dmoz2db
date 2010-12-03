@@ -319,3 +319,9 @@ if __name__ == '__main__':
         LOG.info('Starting second parse of {0}'.format(options.structure_file))
         parse(xmlstream, structure_handler)
         LOG.info('done - inserted additional topic-information to the database')
+
+    content_handler = handler.DmozContentHandler(engine, options.topic_filter)
+
+    with open(options.content_file, 'r') as xmlstream:
+        LOG.info('Starting parse of {0}'.format(options.content_file))
+        parse(xmlstream, content_handler)
