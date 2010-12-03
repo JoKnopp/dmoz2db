@@ -13,6 +13,7 @@ __copyright__ = '© Copyright 2010 Johannes Knopp'
 
 import re
 import logging
+import sys
 
 from xml.sax import handler
 from sqlalchemy.exc import IntegrityError
@@ -107,10 +108,13 @@ class DmozPreStructureHandler(DmozHandler):
 	def endElement(self, tagname):
 		if (tagname==DS.TOPIC):
 			if self.topic_count % 10000 == 0:
-				_log.info('Parsed {0} Topics'.format(self.topic_count))
+				sys.stdout.write('.')
+				if self.topic_count % 200000 == 0:
+					sys.stdout.write('\b - {0} Topics parsed \n'.format(self.topic_count))
+				sys.stdout.flush()
 			self.ignore_topic = False
 			self.topic_name = ''
-		elif tagname == DS.CATID and self.topic_name != '':
+		elif tagname == (DS.CATID) and (self.topic_name != ''):
 			catid = int(self.text)
 			insertion = ts.categories_t.insert(values={
 									'catid':catid,
@@ -161,13 +165,13 @@ class DmozStructureHandler(DmozHandler):
 					return
 			self.topic = Topic(topic)
 
-		elif name==DS.ALIAS and self.topic != None:
+		elif (name==DS.ALIAS) and (self.topic != None):
 			title_alias = attrs.get(DS.topic_attr)
 			alias = title_alias.split(':')[-1]
 			self.topic.add_alias(alias)
 
 		elif name not in self.allowed_tags:
-			_log.debug('Found forbidden tag {0}'.format(name))
+			_log.debug('Found forbidden tag "{0}"'.format(name))
 			pass
 
 		#save attrs in self.topic
@@ -177,7 +181,10 @@ class DmozStructureHandler(DmozHandler):
 	def endElement(self, tagname):
 		if tagname==DS.TOPIC:
 			if self.topic_count % 10000 == 0:
-				_log.info('Parsed {0} Topics'.format(self.topic_count))
+				sys.stdout.write('.')
+				if self.topic_count % 200000 == 0:
+					sys.stdout.write('\b - {0} Topics parsed \n'.format(self.topic_count))
+				sys.stdout.flush()
 			self.ignore_topic = False
 
 		elif tagname == DS.RDF:
@@ -229,7 +236,14 @@ class DmozContentHandler(DmozHandler):
 			pass
 
 	def endElement(self, tagname):
-		if tagname == DS.RDF:
+		if tagname==DC.TOPIC:
+			if self.topic_count % 10000 == 0:
+				sys.stdout.write('.')
+				if self.topic_count % 200000 == 0:
+					sys.stdout.write('\b - {0} Topics parsed \n'.format(self.topic_count))
+				sys.stdout.flush()
+
+		elif tagname == DS.RDF:
 			print
 			_log.info('Parsed {0} Topics'.format(self.topic_count))
 
