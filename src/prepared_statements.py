@@ -1,9 +1,8 @@
 # -*- coding: UTF-8 -*
 
 """
-Object representation for dmoz structure data
-
-Able to store its contents in a database
+prepared sqlalchemy statements make your life easier and your code more
+readable
 """
 
 from __future__ import unicode_literals
