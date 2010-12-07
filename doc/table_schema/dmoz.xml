@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="dmoz" type="MySQL - 5.1.49-2">
+   <tables>
+      <table name="aliases" numRows="922356" remarks="" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="catid" nullable="false" remarks="" size="11" type="int">
+            <parent column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="categories"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="alias_catid" nullable="false" remarks="" size="11" type="int"/>
+         <primaryKey column="alias_catid" sequenceNumberInPK="1"/>
+         <primaryKey column="catid" sequenceNumberInPK="2"/>
+         <index name="PRIMARY" unique="true">
+            <column ascending="true" name="catid"/>
+            <column ascending="true" name="alias_catid"/>
+         </index>
+         <index name="alias_catid" unique="false">
+            <column ascending="true" name="alias_catid"/>
+         </index>
+      </table>
+      <table name="altlangs" numRows="758594" remarks="" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="catid" nullable="false" remarks="" size="11" type="int">
+            <parent column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="categories"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="language" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="resource" nullable="true" remarks="" size="512" type="varchar"/>
+         <primaryKey column="catid" sequenceNumberInPK="1"/>
+         <primaryKey column="language" sequenceNumberInPK="2"/>
+         <index name="PRIMARY" unique="true">
+            <column ascending="true" name="catid"/>
+            <column ascending="true" name="language"/>
+         </index>
+         <index name="ix_altlangs_resource" unique="false">
+            <column ascending="true" name="resource"/>
+         </index>
+      </table>
+      <table name="categories" numRows="767131" remarks="" type="TABLE">
+         <column autoUpdated="true" digits="0" id="0" name="catid" nullable="false" remarks="" size="11" type="int">
+            <child column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="aliases"/>
+            <child column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="altlangs"/>
+            <child column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="externalpages"/>
+            <child column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="newsgroups"/>
+            <child column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="related"/>
+            <child column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="symbolics"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="Topic" nullable="true" remarks="" size="512" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="Title" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="Description" nullable="true" remarks="" size="16277215" type="mediumtext"/>
+         <column autoUpdated="false" digits="0" id="4" name="lastupdate" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="letterbar" nullable="true" remarks="" size="1" type="BIT"/>
+         <column autoUpdated="false" digits="0" id="6" name="fatherid" nullable="true" remarks="" size="11" type="int"/>
+         <primaryKey column="catid" sequenceNumberInPK="1"/>
+         <index name="PRIMARY" unique="true">
+            <column ascending="true" name="catid"/>
+         </index>
+         <index name="fatherid" unique="false">
+            <column ascending="true" name="fatherid"/>
+         </index>
+         <index name="ix_categories_Title" unique="false">
+            <column ascending="true" name="Title"/>
+         </index>
+         <index name="ix_categories_Topic" unique="false">
+            <column ascending="true" name="Topic"/>
+         </index>
+      </table>
+      <table name="externalpages" numRows="4450947" remarks="" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="catid" nullable="true" remarks="" size="11" type="int">
+            <parent column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="categories"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="link" nullable="true" remarks="" size="650" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="Title" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="Description" nullable="true" remarks="" size="16277215" type="mediumtext"/>
+         <index name="catid" unique="false">
+            <column ascending="true" name="catid"/>
+         </index>
+         <index name="ix_externalpages_link" unique="false">
+            <column ascending="true" name="link"/>
+         </index>
+         <index name="ix_externalpages_Title" unique="false">
+            <column ascending="true" name="Title"/>
+         </index>
+      </table>
+      <table name="newsgroups" numRows="20262" remarks="" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="catid" nullable="false" remarks="" size="11" type="int">
+            <parent column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="categories"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="newsgroup" nullable="false" remarks="" size="255" type="varchar"/>
+         <primaryKey column="catid" sequenceNumberInPK="1"/>
+         <primaryKey column="newsgroup" sequenceNumberInPK="2"/>
+         <index name="PRIMARY" unique="true">
+            <column ascending="true" name="catid"/>
+            <column ascending="true" name="newsgroup"/>
+         </index>
+      </table>
+      <table name="related" numRows="687553" remarks="" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="catid" nullable="false" remarks="" size="11" type="int">
+            <parent column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="categories"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="rcatid" nullable="false" remarks="" size="11" type="int"/>
+         <primaryKey column="catid" sequenceNumberInPK="1"/>
+         <primaryKey column="rcatid" sequenceNumberInPK="2"/>
+         <index name="PRIMARY" unique="true">
+            <column ascending="true" name="catid"/>
+            <column ascending="true" name="rcatid"/>
+         </index>
+         <index name="rcatid" unique="false">
+            <column ascending="true" name="rcatid"/>
+         </index>
+      </table>
+      <table name="symbolics" numRows="922356" remarks="" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="catid" nullable="false" remarks="" size="11" type="int">
+            <parent column="catid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="categories"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="symbol" nullable="true" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="scatid" nullable="false" remarks="" size="11" type="int"/>
+         <primaryKey column="catid" sequenceNumberInPK="1"/>
+         <primaryKey column="scatid" sequenceNumberInPK="2"/>
+         <index name="PRIMARY" unique="true">
+            <column ascending="true" name="catid"/>
+            <column ascending="true" name="scatid"/>
+         </index>
+         <index name="scatid" unique="false">
+            <column ascending="true" name="scatid"/>
+         </index>
+      </table>
+   </tables>
+</database>

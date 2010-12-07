@@ -1,0 +1,7 @@
+categories
+aliases
+altlangs
+externalpages
+newsgroups
+related
+symbolics

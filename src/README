@@ -19,23 +19,25 @@ mysql> GRANT ALL ON smalldmoz.* TO 'USERNAME'@'localhost';
 After that you should edit db.sample.conf according to your setup and save it
 as db.conf.
 
-Running:
+The database design can be found in the html pages in the doc folder.
+
+Running
 
 If the rdf files are present in your current directory you can just say
-~$ python dmoz.py
+~/dmoz-dir$ python dmoz.py
 
 but you may want to run 
-~$ python dmoz.py --help
+~/dmoz-dir$ python dmoz.py --help
 
 first and look at the available options. Most of them should be self
 explaining. If you are not interested in the complete dmoz dataset you can
 specify a topic filter to ignore everything which is not under the given
-category which speeds up the process. Take care with trailing slashes:
+category which speeds up the import process. Take care with trailing slashes:
 'Top/Computers' includes the category while 'Top/Computers/' filters for
-everything under that category. The default father id is 1 for every category whose
-father was filtered.
+everything under that category. The default father id is 1 for every category
+whose father was filtered out.
 
-Debug output should be turned on only in combination with the logging option
+Debug output should be turned on only in combination with the log file option
 because every sql statement is printed.
 
 The import will take time, so go to lunch or find something else to do :) And
@@ -46,10 +48,9 @@ are added in the second parse. Last but not least the content.rdf file is
 parsed to add the externalpage information to the database.
 
 On my laptop it took about 20 minutes to complete the first parse, 25 minutes
-for generating father ids, <TIME> minutes for the second parse and <TIME>
-minutes for the content.rdf file which results in <TIME> total. One dot in the
-output means 10,000 processed topics, newline is generated after 200,000
-Topics.
+for generating father ids, 2:08 h for the second parse and 8 h for the
+content.rdf file which results in ~11 h total. One dot in the output means
+10,000 processed topics, a newline is generated after 200,000 Topics.
 
 In the structure.rdf file entries dealing with the last editor are ignored. For
 content.rdf the tags <mediadate>, <type>, <uksite>, <age> and <priority> are
