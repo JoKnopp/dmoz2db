@@ -124,7 +124,7 @@ class DmozPreStructureHandler(DmozHandler):
 			if self.topic_count % 10000 == 0:
 				sys.stdout.write('.')
 				if self.topic_count % 200000 == 0:
-					sys.stdout.write('\b - {0} Topics parsed \n'.format(self.topic_count))
+					sys.stdout.write(' - {0} Topics parsed \n'.format(self.topic_count))
 				sys.stdout.flush()
 			self.ignore_topic = False
 			self.topic_name = ''
@@ -197,7 +197,7 @@ class DmozStructureHandler(DmozHandler):
 			if self.topic_count % 10000 == 0:
 				sys.stdout.write('.')
 				if self.topic_count % 200000 == 0:
-					sys.stdout.write('\b - {0} Topics parsed \n'.format(self.topic_count))
+					sys.stdout.write(' - {0} Topics parsed \n'.format(self.topic_count))
 				sys.stdout.flush()
 			self.ignore_topic = False
 
@@ -230,7 +230,7 @@ class DmozContentHandler(DmozHandler):
 	def startElement(self, name, attrs):
 		if name==DC.TOPIC:
 			self.topic_count += 1
-			topic = attrs.get(DS.topic_attr)
+			topic = attrs.get(DC.topic_attr)
 			if self.has_topicfilter:
 				if not topic.startswith(self.topic_filter):
 					self.ignore_topic = True
@@ -239,29 +239,26 @@ class DmozContentHandler(DmozHandler):
 					self.ignore_topic = False
 					return
 
-		if self.ignore_topic:
-			pass
-
-		elif name==DC.EXTERNALPAGE:
+		elif (name==DC.EXTERNALPAGE) and (not self.ignore_topic):
 			self.link = Link(attrs.get(DC.ext_attr), self.catid)
 
 		elif name not in self.allowed_tags:
 			_log.debug('Found forbidden tag "{0}"'.format(name))
-			pass
 
 	def endElement(self, tagname):
 		if tagname==DC.TOPIC:
 			if self.topic_count % 10000 == 0:
 				sys.stdout.write('.')
 				if self.topic_count % 200000 == 0:
-					sys.stdout.write('\b - {0} Topics parsed \n'.format(self.topic_count))
+					sys.stdout.write(' - {0} Topics parsed \n'.format(self.topic_count))
 				sys.stdout.flush()
 
-		elif tagname == DS.RDF:
+		elif tagname == DC.RDF:
 			print
 			_log.info('Parsed {0} Topics'.format(self.topic_count))
 
 		elif self.ignore_topic:
+			self.text = ''
 			return
 
 		#save text fields

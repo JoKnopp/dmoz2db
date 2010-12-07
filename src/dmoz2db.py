@@ -302,7 +302,7 @@ def add_father_ids(engine):
         if counter % 10000 == 0:
             sys.stdout.write('.')
             if counter % 200000 == 0:
-                sys.stdout.write('\b - {0} ids generated\n'.format(counter))
+                sys.stdout.write(' - {0} ids generated\n'.format(counter))
             sys.stdout.flush()
     print
     
