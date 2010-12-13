@@ -32,7 +32,6 @@ import sys
 import optparse
 import logging
 import ConfigParser #for the database config file
-import handler
 import time
 from datetime import timedelta
 from xml.sax import parse
@@ -41,7 +40,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import bindparam
 
-from schemes import table_scheme
+from lib import handler
+from lib.schemes import table_scheme
 
 #the global logger
 LOG = logging.Logger(__name__)

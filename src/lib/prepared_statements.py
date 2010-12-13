@@ -21,6 +21,7 @@ readable
 """
 
 from __future__ import unicode_literals
+from __future__ import absolute_import
 
 __version__ = '0.1'
 __author__ = 'Johannes Knopp <johannes@informatik.uni-mannheim.de>'
@@ -28,7 +29,7 @@ __copyright__ = '© Copyright 2010 Johannes Knopp'
 
 from sqlalchemy.sql.expression import bindparam
 
-import schemes.table_scheme as ts
+from .schemes import table_scheme as ts
 
 at = ts.aliases_t
 ct = ts.categories_t

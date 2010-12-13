@@ -20,6 +20,7 @@ Handler for dmoz RDF-like data.
 """
 
 from __future__ import unicode_literals
+from __future__ import absolute_import
 
 __version__ = '0.1'
 __author__ = 'Johannes Knopp <johannes@informatik.uni-mannheim.de>'
@@ -32,11 +33,11 @@ import sys
 from xml.sax import handler
 from sqlalchemy.exc import IntegrityError
 
-import schemes.table_scheme as ts
-from schemes.xml_scheme import DmozStructure as DS
-from schemes.xml_scheme import DmozContent as DC
-from structure import Topic
-from content import Link
+from .schemes import table_scheme as ts
+from .schemes.xml_scheme import DmozStructure as DS
+from .schemes.xml_scheme import DmozContent as DC
+from .structure import Topic
+from .content import Link
 
 _log = logging.getLogger(__name__)
 
