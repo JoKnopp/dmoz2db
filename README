@@ -14,7 +14,7 @@ http://cameronyule.com/2008/07/configuring-mysql-to-use-utf-8
 The database where the dmoz data will be stored must be created manually:
 
 mysql> create database DATABASENAME;
-mysql> GRANT ALL ON smalldmoz.* TO 'USERNAME'@'localhost';
+mysql> GRANT ALL ON DATABASENAME.* TO 'USERNAME'@'localhost';
 
 After that you should edit db.sample.conf according to your setup and save it
 as db.conf.
@@ -27,7 +27,7 @@ If the rdf files are present in your current directory you can just say
 ~/dmoz-dir/src $ python dmoz.py
 
 but you may want to run 
-~/dmoz-dir/src $ python dmoz.py --help
+~/dmoz-dir/src $ python dmoz2db.py --help
 
 first and look at the available options. Most of them should be self
 explaining. If you are not interested in the complete dmoz dataset you can
