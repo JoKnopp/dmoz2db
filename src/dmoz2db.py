@@ -61,6 +61,12 @@ SLOG.setLevel(logging.DEBUG)
 #Error while connecting to the database
 DBCONNECT = 2
 
+def force_parse( *args ):
+    try:
+        parse( *args )
+    except Exception as e:
+        LOG.exception( e )
+
 def init_optionparser():
     """Initialise command line parser."""
 
@@ -136,7 +142,8 @@ def init_optionparser():
                             ', '.join(log_level) +
                             ') [default: %default]',
                             action='store', default='INFO',
-                            type='choice', choices=log_level
+                            type='choice', choices=log_level,
+                            dest='log_level'
                             )
 
     parser.add_option_group(log_options)
@@ -241,7 +248,7 @@ def new_engine(cf):
         port = ':' + port
     url = dialect + driver + '://' + user + ':' + pw + '@' + host + port + '/' + db_name
     try:
-        engine = create_engine(url + '?charset=utf8', encoding='utf-8')
+        engine = create_engine(str(url + '?charset=utf8'), encoding=str('utf-8'))
     except ImportError, i:
         LOG.error('Could not find database driver. Make sure it is installed or specify the driver you want to use in the config file!')
         LOG.error(i)
@@ -316,12 +323,14 @@ if __name__ == '__main__':
     engine = new_engine(dbconfig)
     test_engine(engine)
     setup_db(engine, options.keep_db)
+    error_handler = handler.DmozErrorHandler()
+
 
     structure_prehandler = handler.DmozPreStructureHandler(engine, options.topic_filter)
     with open(options.structure_file, 'r') as xmlstream:
         LOG.info('Starting first parse of {0}'.format(options.structure_file))
         firstparse_starttime = time.time()
-        parse(xmlstream, structure_prehandler)
+        force_parse(xmlstream, structure_prehandler, error_handler)
         firstparse_duration = timedelta(seconds=(time.time()-firstparse_starttime))
         LOG.info('done - added all Topics to the database (took {0})'.format(firstparse_duration))
 
@@ -336,7 +345,7 @@ if __name__ == '__main__':
     with open(options.structure_file, 'r') as xmlstream:
         LOG.info('Starting second parse of {0}'.format(options.structure_file))
         secondparse_starttime = time.time()
-        parse(xmlstream, structure_handler)
+        force_parse(xmlstream, structure_handler, error_handler)
         secondparse_duration = timedelta(seconds=(time.time()-secondparse_starttime))
         LOG.info('done - inserted additional topic-information to the database (took {0})'.format(secondparse_duration))
 
@@ -345,7 +354,7 @@ if __name__ == '__main__':
     with open(options.content_file, 'r') as xmlstream:
         LOG.info('Starting parse of {0}'.format(options.content_file))
         contentparse_starttime = time.time()
-        parse(xmlstream, content_handler)
+        force_parse(xmlstream, content_handler, error_handler)
         contentparse_duration = timedelta(seconds=(time.time()-contentparse_starttime))
         LOG.info('done - inserted externalpage information to the database (took {0})'.format(contentparse_duration))
 

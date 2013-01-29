@@ -276,3 +276,15 @@ class DmozContentHandler(DmozHandler):
 
 		#cf. character function of DmozHandler
 		self.text = ''
+
+
+class DmozErrorHandler(handler.ErrorHandler):
+
+	def error(self, exception):
+		_log.exception(exception)
+
+	def fatalError(self, exception):
+		_log.exception(exception)
+
+	def warning(self, exception):
+		_log.exception(exception)
