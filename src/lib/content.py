@@ -31,7 +31,7 @@ import sys
 import logging
 
 from sqlalchemy.sql.expression import bindparam
-from sqlalchemy.exceptions import IntegrityError
+from sqlalchemy.exc import IntegrityError
 
 from prepared_statements import *
 
