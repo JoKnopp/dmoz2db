@@ -24,7 +24,7 @@ The database design can be found in the html pages in the doc folder.
 Running
 
 If the rdf files are present in your current directory you can just say
-~/dmoz-dir/src $ python dmoz.py
+~/dmoz-dir/src $ python dmoz2db.py
 
 but you may want to run 
 ~/dmoz-dir/src $ python dmoz2db.py --help
