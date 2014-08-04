@@ -70,7 +70,7 @@ symbolics_t = Table('symbolics', metadata,
 #content.rdf
 externalpages_t = Table('externalpages', metadata,
 	Column('catid', Integer, ForeignKey('categories.catid')),
-	Column('link', Unicode(650), index=True),
+	Column('link', Unicode(750), index=True),
 	Column('Title', Unicode(255), index=True),
 	Column('Description', Text(65535)),
 )
